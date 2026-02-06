@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>हिंदी विचार — Hindi Quotes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Noto+Sans+Devanagari:wght@300;400;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            transition: background 0.8s ease;
+            overflow: hidden;
+        }
+
+        /* Animated gradient backgrounds */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            transition: opacity 1s ease;
+        }
+
+        .bg-layer.active { opacity: 1; }
+        .bg-layer.hidden { opacity: 0; }
+
+        .particles {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            animation: float linear infinite;
+        }
+
+        @keyframes float {
+            0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            text-align: center;
+            padding: 24px 16px 12px;
+            z-index: 10;
+        }
+
+        .app-header h1 {
+            font-family: 'Tiro Devanagari Hindi', serif;
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .quote-container {
+            max-width: 700px;
+            width: 90%;
+            padding: 48px 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .quote-container:hover {
+            transform: translateY(-4px);
+        }
+
+        .quote-mark {
+            font-size: 4rem;
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.3);
+            font-family: Georgia, serif;
+            margin-bottom: -10px;
+        }
+
+        .quote-text {
+            font-family: 'Tiro Devanagari Hindi', serif;
+            font-size: 1.65rem;
+            line-height: 2;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            margin-bottom: 28px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .quote-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .divider {
+            width: 60px;
+            height: 2px;
+            background: rgba(255,255,255,0.4);
+            margin: 0 auto 20px;
+            border-radius: 2px;
+        }
+
+        .writer-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 1px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
+        }
+
+        .writer-name.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .writer-name::before { content: "— "; }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            margin-top: 36px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 36px;
+            border: 2px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.6);
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.6);
+        }
+
+        .btn-copy {
+            padding: 14px 24px;
+            font-size: 0.9rem;
+        }
+
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.4s ease;
+            z-index: 100;
+        }
+
+        .copy-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .counter {
+            position: fixed;
+            bottom: 20px;
+            right: 24px;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.85rem;
+        }
+
+        .category-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        .cat-btn {
+            padding: 6px 18px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: transparent;
+            color: rgba(255,255,255,0.7);
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-size: 0.85rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cat-btn:hover, .cat-btn.active {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        @media (max-width: 600px) {
+            .quote-container { padding: 32px 24px; }
+            .quote-text { font-size: 1.3rem; line-height: 1.9; }
+            .quote-mark { font-size: 3rem; }
+            .app-header h1 { font-size: 1.2rem; }
+        }
+
+        /* Keyboard hint */
+        .hint {
+            position: fixed;
+            bottom: 20px;
+            left: 24px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layer active" id="bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <header class="app-header">
+        <h1>हिंदी विचार</h1>
+    </header>
+
+    <main>
+        <div class="category-bar" id="categoryBar"></div>
+
+        <div class="quote-container">
+            <div class="quote-mark">"</div>
+            <p class="quote-text" id="quoteText"></p>
+            <div class="divider"></div>
+            <p class="writer-name" id="writerName"></p>
+            <div class="controls">
+                <button class="btn btn-primary" id="newQuoteBtn" onclick="showNext()">नया विचार</button>
+                <button class="btn btn-copy" onclick="copyQuote()">कॉपी करें</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="copy-toast" id="toast">कॉपी हो गया!</div>
+    <div class="counter" id="counter"></div>
+    <div class="hint">Space / → अगला विचार</div>
+
+    <script>
+    const quotes = [
+        // --- प्रेरणा (Inspiration) ---
+        { text: "जो व्यक्ति अपनी गलतियों से सीखता है, वही सबसे बुद्धिमान है।", writer: "प्रेमचंद", category: "प्रेरणा" },
+        { text: "मंज़िल उन्हीं को मिलती है जिनके सपनों में जान होती है, पंखों से कुछ नहीं होता, हौसलों से उड़ान होती है।", writer: "रामधारी सिंह दिनकर", category: "प्रेरणा" },
+        { text: "सफलता वही पाते हैं जो अपने रास्ते खुद बनाते हैं, भीड़ के पीछे चलने वाले अक्सर भीड़ में ही खो जाते हैं।", writer: "स्वामी विवेकानन्द", category: "प्रेरणा" },
+        { text: "उठो, जागो और तब तक नहीं रुको जब तक लक्ष्य की प्राप्ति न हो जाए।", writer: "स्वामी विवेकानन्द", category: "प्रेरणा" },
+        { text: "कर्म करो, फल की चिंता मत करो।", writer: "श्रीमद्भगवद्गीता", category: "प्रेरणा" },
+        { text: "विश्वास वह शक्ति है जिससे उजड़ी हुई दुनिया में भी प्रकाश लाया जा सकता है।", writer: "हेलेन केलर (हिंदी अनुवाद)", category: "प्रेरणा" },
+        { text: "अगर ज़िंदगी में कुछ पाना हो तो अपने तरीके बदलो, इरादे नहीं।", writer: "चाणक्य", category: "प्रेरणा" },
+        { text: "हार नहीं मानूँगा, रार नहीं ठानूँगा, काल के कपाल पर लिखता मिटाता हूँ।", writer: "रामधारी सिंह दिनकर", category: "प्रेरणा" },
+        { text: "खुद वो बदलाव बनिए जो आप दुनिया में देखना चाहते हैं।", writer: "महात्मा गांधी", category: "प्रेरणा" },
+        { text: "संघर्ष में आदमी अकेला होता है, सफलता में दुनिया उसके साथ होती है।", writer: "हरिवंश राय बच्चन", category: "प्रेरणा" },
+        { text: "ताकत इसमें नहीं कि तुम कितना उठा सकते हो, ताकत इसमें है कि तुम कितनी बार गिरकर उठ सकते हो।", writer: "स्वामी विवेकानन्द", category: "प्रेरणा" },
+        { text: "जो तूफ़ानों में पलते हैं वो तूफ़ान से नहीं डरते, जिन्हें समंदर डुबोता है वो किनारे पर नहीं मरते।", writer: "रामधारी सिंह दिनकर", category: "प्रेरणा" },
+        { text: "कठिनाइयाँ वो चीज़ें हैं जो हमें तब दिखती हैं जब हम लक्ष्य से नज़र हटा लेते हैं।", writer: "महात्मा गांधी", category: "प्रेरणा" },
+        { text: "असफलता एक चुनौती है, स्वीकार करो; क्या कमी रह गई, देखो और सुधार करो।", writer: "हरिवंश राय बच्चन", category: "प्रेरणा" },
+        { text: "इंसान को कठिनाइयों की आवश्यकता होती है क्योंकि सफलता का आनंद उठाने के लिए ये ज़रूरी हैं।", writer: "ए.पी.जे. अब्दुल कलाम", category: "प्रेरणा" },
+        { text: "जब तक तुम खुद पर विश्वास नहीं करते, तब तक तुम भगवान पर विश्वास नहीं कर सकते।", writer: "स्वामी विवेकानन्द", category: "प्रेरणा" },
+        { text: "धीरे-धीरे रे मना, धीरे सब कुछ होय, माली सींचे सौ घड़ा, ऋतु आए फल होय।", writer: "कबीरदास", category: "प्रेरणा" },
+        { text: "हिम्मत करने वालों की कभी हार नहीं होती।", writer: "सुभाष चंद्र बोस", category: "प्रेरणा" },
+        { text: "अपनी ताक़त को पहचानो, दुनिया तुम्हारे क़दमों में होगी।", writer: "स्वामी विवेकानन्द", category: "प्रेरणा" },
+        { text: "वीरों का कैसा हो वसंत, आओ इसे जानें; फूलों की कैसी बहार हो, आओ इसे पहचानें।", writer: "सुभद्रा कुमारी चौहान", category: "प्रेरणा" },
+
+        // --- जीवन (Life) ---
+        { text: "ज़िंदगी लंबी नहीं, बड़ी होनी चाहिए।", writer: "रामधारी सिंह दिनकर", category: "जीवन" },
+        { text: "जीवन में सुख-दुख तो आते-जाते रहते हैं, पर जो मुस्कुराते हुए चलता है, रास्ते उसके लिए फूल बिछाते हैं।", writer: "प्रेमचंद", category: "जीवन" },
+        { text: "लहरों से डरकर नौका पार नहीं होती, कोशिश करने वालों की हार नहीं होती।", writer: "हरिवंश राय बच्चन", category: "जीवन" },
+        { text: "जो बीत गई सो बात गई, जीवन में एक सितारा था, माना वह बेहद प्यारा था।", writer: "हरिवंश राय बच्चन", category: "जीवन" },
+        { text: "ज़िंदगी बहुत कुछ सिखाती है, कभी हँसाती है तो कभी रुलाती है।", writer: "गुलज़ार", category: "जीवन" },
+        { text: "समय बड़ा बलवान है, यह किसी के लिए नहीं रुकता।", writer: "कबीरदास", category: "जीवन" },
+        { text: "दुख में सुमिरन सब करे, सुख में करे न कोय, जो सुख में सुमिरन करे, दुख काहे को होय।", writer: "कबीरदास", category: "जीवन" },
+        { text: "जीवन एक संघर्ष है, इसे जीतने के लिए लड़ना ज़रूरी है।", writer: "सुभाष चंद्र बोस", category: "जीवन" },
+        { text: "ज़िंदगी में अगर कभी असफलता मिले तो घबराना नहीं क्योंकि असफलता का मतलब होता है — पहला प्रयास सीखने में।", writer: "ए.पी.जे. अब्दुल कलाम", category: "जीवन" },
+        { text: "बीती ताहि बिसार दे, आगे की सुध ले।", writer: "कबीरदास", category: "जीवन" },
+        { text: "माटी कहे कुम्हार से, तू क्या रौंदे मोय, एक दिन ऐसा आएगा, मैं रौंदूँगी तोय।", writer: "कबीरदास", category: "जीवन" },
+        { text: "जीवन का अर्थ केवल जीना नहीं है, बल्कि दूसरों के लिए भी कुछ करना है।", writer: "प्रेमचंद", category: "जीवन" },
+        { text: "ज़माने भर के दुख इस दिल में समा लेता तो अच्छा था, तेरी महफ़िल में रो देता तो शायद मुस्कुरा लेता।", writer: "फ़ैज़ अहमद फ़ैज़", category: "जीवन" },
+        { text: "रहिमन धागा प्रेम का, मत तोड़ो चटकाय, टूटे से फिर ना जुड़े, जुड़े गाँठ पड़ जाय।", writer: "रहीमदास", category: "जीवन" },
+        { text: "जीवन में मुसीबत तब आती है जब हम अपनी सीमाओं से बाहर नहीं निकलते।", writer: "रवींद्रनाथ टैगोर", category: "जीवन" },
+        { text: "ज़िंदगी की राह में ग़म भी है, ख़ुशियाँ भी हैं; यह किसी एक रंग का नाम नहीं है।", writer: "साहिर लुधियानवी", category: "जीवन" },
+        { text: "मन के हारे हार है, मन के जीते जीत।", writer: "तुलसीदास", category: "जीवन" },
+        { text: "चलती चक्की देखकर, दिया कबीरा रोय, दो पाटन के बीच में, साबुत बचा न कोय।", writer: "कबीरदास", category: "जीवन" },
+        { text: "ख़ुशी इतनी दे दे ख़ुदा बस, कि ग़म जब आए तो बर्दाश्त कर सकूँ।", writer: "बशीर बद्र", category: "जीवन" },
+        { text: "अभी तो मैं जवान हूँ, अभी यह दिल जवान है, अभी तो जीने का मज़ा और ही कुछ और है।", writer: "साहिर लुधियानवी", category: "जीवन" },
+
+        // --- प्रेम (Love) ---
+        { text: "प्रेम पाने की नहीं, देने की चीज़ है।", writer: "ओशो", category: "प्रेम" },
+        { text: "मोहब्बत एक एहसास है जो दिल से होता है, इसे शब्दों में बयान नहीं किया जा सकता।", writer: "मिर्ज़ा ग़ालिब", category: "प्रेम" },
+        { text: "इश्क़ पर ज़ोर नहीं, है ये वो आतिश ग़ालिब, कि लगाए न लगे और बुझाए न बने।", writer: "मिर्ज़ा ग़ालिब", category: "प्रेम" },
+        { text: "ढूंढोगे अगर मुल्कों-मुल्कों में मिलेंगे तुमको, पर बेवफ़ा शायद न मिलें तुमको दिल-ए-नादान।", writer: "मीर तक़ी मीर", category: "प्रेम" },
+        { text: "प्रेम वो नहीं जो ज़ुबान से बोला जाए, प्रेम वो है जो आँखों से झलकता है।", writer: "रवींद्रनाथ टैगोर", category: "प्रेम" },
+        { text: "पोथी पढ़ि पढ़ि जग मुआ, पंडित भया न कोय, ढाई आखर प्रेम का, पढ़े सो पंडित होय।", writer: "कबीरदास", category: "प्रेम" },
+        { text: "हज़ारों ख्वाहिशें ऐसी कि हर ख्वाहिश पे दम निकले, बहुत निकले मेरे अरमान लेकिन फिर भी कम निकले।", writer: "मिर्ज़ा ग़ालिब", category: "प्रेम" },
+        { text: "दिल-ए-नादान तुझे हुआ क्या है, आख़िर इस दर्द की दवा क्या है।", writer: "मिर्ज़ा ग़ालिब", category: "प्रेम" },
+        { text: "तेरे आने की जब ख़बर महके, तेरे ख़ुशबू से सारा घर महके।", writer: "अहमद फ़राज़", category: "प्रेम" },
+        { text: "मुझसे पहली सी मोहब्बत मेरी महबूब न माँग।", writer: "फ़ैज़ अहमद फ़ैज़", category: "प्रेम" },
+        { text: "उनकी याद आई तो आँसू मुस्कुरा दिए, जाने क्या बात है कि ख़ुशी भी उदास है।", writer: "जॉन एलिया", category: "प्रेम" },
+        { text: "कोई उमीद बर नहीं आती, कोई सूरत नज़र नहीं आती, मौत का एक दिन मुअय्यन है, नींद क्यों रात भर नहीं आती।", writer: "मिर्ज़ा ग़ालिब", category: "प्रेम" },
+        { text: "ये इश्क़ नहीं आसान, बस इतना समझ लीजे, एक आग का दरिया है और डूब के जाना है।", writer: "जिगर मुरादाबादी", category: "प्रेम" },
+        { text: "रंजिश ही सही दिल ही दुखाने के लिए आ, आ फिर से मुझे छोड़ के जाने के लिए आ।", writer: "अहमद फ़राज़", category: "प्रेम" },
+        { text: "तू इधर उधर की न बात कर, ये बता कि क़ाफ़िला क्यों लुटा, मुझे रहज़नों से गिला नहीं, तेरी रहबरी का सवाल है।", writer: "अकबर इलाहाबादी", category: "प्रेम" },
+        { text: "वो फ़राक़ और वो विसाल कहाँ, वो शब-ओ-रोज़ और माह-ओ-साल कहाँ।", writer: "मिर्ज़ा ग़ालिब", category: "प्रेम" },
+        { text: "मोहब्बत में नहीं है फ़र्क़ जीने और मरने में, उसी को देख कर जीते हैं जिस काफ़िर पे दम निकले।", writer: "मिर्ज़ा ग़ालिब", category: "प्रेम" },
+
+        // --- देशभक्ति (Patriotism) ---
+        { text: "सारे जहाँ से अच्छा हिन्दोस्ताँ हमारा।", writer: "मुहम्मद इक़बाल", category: "देशभक्ति" },
+        { text: "तुम मुझे खून दो, मैं तुम्हें आज़ादी दूँगा।", writer: "सुभाष चंद्र बोस", category: "देशभक्ति" },
+        { text: "स्वतंत्रता मेरा जन्मसिद्ध अधिकार है और मैं इसे लेकर रहूँगा।", writer: "बाल गंगाधर तिलक", category: "देशभक्ति" },
+        { text: "दुश्मन की गोलियों का हम सामना करेंगे, आज़ाद हैं, आज़ाद रहेंगे।", writer: "चंद्रशेखर आज़ाद", category: "देशभक्ति" },
+        { text: "वो तोड़ती पत्थर, देखा उसे मैंने इलाहाबाद के पथ पर।", writer: "सूर्यकान्त त्रिपाठी 'निराला'", category: "देशभक्ति" },
+        { text: "जिस देश में गंगा बहती है, वो भारत देश है मेरा।", writer: "शैलेंद्र", category: "देशभक्ति" },
+        { text: "सरफ़रोशी की तमन्ना अब हमारे दिल में है, देखना है ज़ोर कितना बाज़ु-ए-क़ातिल में है।", writer: "बिस्मिल अज़ीमाबादी", category: "देशभक्ति" },
+        { text: "खींचो न कमानों को न तलवार निकालो, जब तोप मुक़ाबिल हो तो अख़बार निकालो।", writer: "अकबर इलाहाबादी", category: "देशभक्ति" },
+        { text: "अहिंसा परमो धर्मः, सत्य ही ईश्वर है।", writer: "महात्मा गांधी", category: "देशभक्ति" },
+        { text: "मेरा रंग दे बसंती चोला, माय रंग दे बसंती चोला।", writer: "भगत सिंह", category: "देशभक्ति" },
+        { text: "दिल्ली चलो! हमारी आज़ादी की आख़िरी लड़ाई शुरू हो चुकी है।", writer: "सुभाष चंद्र बोस", category: "देशभक्ति" },
+        { text: "सिंहासन हिल उठे, राजवंशों ने भृकुटी तानी थी, बूढ़े भारत में आई फिर से नई जवानी थी।", writer: "सुभद्रा कुमारी चौहान", category: "देशभक्ति" },
+        { text: "जय हिंद! इन शब्दों में वो ताक़त है जो हर भारतीय के दिल को जोड़ती है।", writer: "सुभाष चंद्र बोस", category: "देशभक्ति" },
+        { text: "करो या मरो।", writer: "महात्मा गांधी", category: "देशभक्ति" },
+        { text: "इंक़लाब ज़िंदाबाद! साम्राज्यवाद का नाश हो!", writer: "भगत सिंह", category: "देशभक्ति" },
+        { text: "पराधीन सपनेहुँ सुख नाहीं।", writer: "तुलसीदास", category: "देशभक्ति" },
+
+        // --- ज्ञान (Wisdom) ---
+        { text: "विद्या सबसे बड़ा धन है, इसे कोई चुरा नहीं सकता।", writer: "चाणक्य", category: "ज्ञान" },
+        { text: "शिक्षा सबसे शक्तिशाली हथियार है जिससे आप दुनिया बदल सकते हैं।", writer: "ए.पी.जे. अब्दुल कलाम", category: "ज्ञान" },
+        { text: "ज्ञान से बड़ा कोई मित्र नहीं, अज्ञान से बड़ा कोई शत्रु नहीं।", writer: "चाणक्य", category: "ज्ञान" },
+        { text: "सपने वो नहीं जो नींद में आएं, सपने वो हैं जो नींद ही न आने दें।", writer: "ए.पी.जे. अब्दुल कलाम", category: "ज्ञान" },
+        { text: "अनुभव ही सबसे बड़ा गुरु है।", writer: "चाणक्य", category: "ज्ञान" },
+        { text: "जिसने अपने को वश में कर लिया, उसकी जीत को देवता भी हार में नहीं बदल सकते।", writer: "श्रीमद्भगवद्गीता", category: "ज्ञान" },
+        { text: "क्रोध मूर्खता से शुरू होता है और पश्चाताप पर समाप्त होता है।", writer: "रहीमदास", category: "ज्ञान" },
+        { text: "बड़ा सोचो, जल्दी सोचो, आगे सोचो। विचारों पर किसी का एकाधिकार नहीं है।", writer: "धीरूभाई अंबानी", category: "ज्ञान" },
+        { text: "रहिमन विपदा हू भली, जो थोरे दिन होय, हित अनहित या जगत में, जान परत सब कोय।", writer: "रहीमदास", category: "ज्ञान" },
+        { text: "साँच बराबर तप नहीं, झूठ बराबर पाप, जाके हिरदय साँच है, ताके हिरदय आप।", writer: "कबीरदास", category: "ज्ञान" },
+        { text: "विनाश काले विपरीत बुद्धि — जब बुरा वक़्त आता है तो बुद्धि उल्टा काम करती है।", writer: "महाभारत", category: "ज्ञान" },
+        { text: "जहाँ सूरज की रोशनी नहीं पहुँचती, वहाँ कवि की कल्पना पहुँच जाती है।", writer: "जयशंकर प्रसाद", category: "ज्ञान" },
+        { text: "दूसरों की भलाई में ही अपनी भलाई है।", writer: "महात्मा गांधी", category: "ज्ञान" },
+        { text: "जो अपने क़दमों की ताक़त पर भरोसा रखते हैं वो ही अक्सर मंज़िल पर पहुँचते हैं।", writer: "प्रेमचंद", category: "ज्ञान" },
+        { text: "गुरु बिन ज्ञान न उपजै, गुरु बिन मिलै न मोक्ष।", writer: "कबीरदास", category: "ज्ञान" },
+        { text: "बड़े लोग अक्सर अकेले होते हैं, भीड़ में तो हर कोई दिख जाता है।", writer: "प्रेमचंद", category: "ज्ञान" },
+        { text: "सब्र का फल मीठा होता है।", writer: "लोकोक्ति", category: "ज्ञान" },
+        { text: "जो होना है वो होकर रहेगा, चिंता से कुछ नहीं बदलता।", writer: "श्रीमद्भगवद्गीता", category: "ज्ञान" },
+
+        // --- आध्यात्म (Spirituality) ---
+        { text: "तन को जोगी सब करें, मन को विरला कोय, सब सिद्धि सहजे पाइए, जे मन जोगी होय।", writer: "कबीरदास", category: "आध्यात्म" },
+        { text: "ईश्वर हर जगह नहीं हो सकता था, इसलिए उसने माँ बनाई।", writer: "लोकोक्ति", category: "आध्यात्म" },
+        { text: "आत्मा न कभी जन्म लेती है और न कभी मरती है, यह शाश्वत और अविनाशी है।", writer: "श्रीमद्भगवद्गीता", category: "आध्यात्म" },
+        { text: "जो मन को शांत रखता है, वह संसार का सबसे बड़ा योद्धा है।", writer: "गौतम बुद्ध", category: "आध्यात्म" },
+        { text: "तुम अपना प्रकाश स्वयं हो।", writer: "गौतम बुद्ध", category: "आध्यात्म" },
+        { text: "बुरा जो देखन मैं चला, बुरा न मिलिया कोय, जो दिल खोजा आपना, मुझसे बुरा न कोय।", writer: "कबीरदास", category: "आध्यात्म" },
+        { text: "क्षमा वीरों का आभूषण है।", writer: "श्रीमद्भगवद्गीता", category: "आध्यात्म" },
+        { text: "जब तुम किसी से नफ़रत करते हो, तो तुम ख़ुद को सज़ा देते हो।", writer: "गौतम बुद्ध", category: "आध्यात्म" },
+        { text: "मन चंगा तो कठौती में गंगा।", writer: "गुरु रविदास", category: "आध्यात्म" },
+        { text: "कबीरा खड़ा बाज़ार में, माँगे सबकी खैर, ना काहू से दोस्ती, ना काहू से बैर।", writer: "कबीरदास", category: "आध्यात्म" },
+        { text: "निर्बल के बल राम।", writer: "तुलसीदास", category: "आध्यात्म" },
+        { text: "जीव हमेशा ब्रह्म है, यही वेदांत का सार।", writer: "आदि शंकराचार्य", category: "आध्यात्म" },
+        { text: "ध्यान वह अवस्था है जब मन शांत हो जाता है और आत्मा बोलती है।", writer: "ओशो", category: "आध्यात्म" },
+        { text: "इक ओंकार सतिनाम — एक ईश्वर है जिसका नाम सत्य है।", writer: "गुरु नानक देव", category: "आध्यात्म" },
+        { text: "सबसे बड़ी तपस्या सहनशीलता है।", writer: "गौतम बुद्ध", category: "आध्यात्म" },
+
+        // --- हास्य (Humor) ---
+        { text: "पैसा भगवान नहीं है पर भगवान से कम भी नहीं।", writer: "लोकोक्ति", category: "हास्य" },
+        { text: "दूसरों के दोष गिनने से अपने दोष कम नहीं होते, पर मज़ा ज़रूर आता है।", writer: "लोकोक्ति", category: "हास्य" },
+        { text: "ख़ुदा से ज़्यादा तेरी चाहत ने मारा, कसम से अब तौबा करता हूँ ऐ चाय।", writer: "अज्ञात", category: "हास्य" },
+        { text: "जी भर के मिलो, ज़रा ठहर के चलो; ख़ुदा जाने कब मिलें दोबारा — बिजली कट जाती है यहाँ।", writer: "अज्ञात", category: "हास्य" },
+        { text: "मुफ़्त की चीज़ों के लिए लोग कतार में खड़े हो जाते हैं, यही भारत का प्रेम है।", writer: "लोकोक्ति", category: "हास्य" },
+        { text: "दुनिया में सबसे मुश्किल काम है सुबह जल्दी उठना — बाकी सब संभव है।", writer: "अज्ञात", category: "हास्य" },
+        { text: "पड़ोसी का घर हमेशा हरा दिखता है, क्योंकि वो हमारे पानी से सींचता है।", writer: "लोकोक्ति", category: "हास्य" },
+        { text: "सब कहते हैं ज़माना ख़राब है, ज़माना कहता है लोग ख़राब हैं।", writer: "अज्ञात", category: "हास्य" },
+        { text: "आलसी व्यक्ति दुनिया का सबसे बड़ा आविष्कारक है — कम मेहनत में ज़्यादा काम की सोचता है।", writer: "लोकोक्ति", category: "हास्य" },
+        { text: "पेट में लड्डू फूटना — यह भारत का सबसे मीठा मुहावरा है।", writer: "लोकोक्ति", category: "हास्य" },
+    ];
+
+    const gradients = [
+        "linear-gradient(135deg, #0f0c29, #302b63, #24243e)",
+        "linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)",
+        "linear-gradient(135deg, #0F2027, #203A43, #2C5364)",
+        "linear-gradient(135deg, #360033, #0b8793)",
+        "linear-gradient(135deg, #4e54c8, #8f94fb)",
+        "linear-gradient(135deg, #11998e, #38ef7d)",
+        "linear-gradient(135deg, #c94b4b, #4b134f)",
+        "linear-gradient(135deg, #2C3E50, #FD746C)",
+        "linear-gradient(135deg, #0f0c29, #232526, #414345)",
+        "linear-gradient(135deg, #6a3093, #a044ff)",
+        "linear-gradient(135deg, #1f4037, #99f2c8)",
+        "linear-gradient(135deg, #141E30, #243B55)",
+    ];
+
+    let currentIndex = -1;
+    let currentCategory = "सभी";
+    let filteredQuotes = [...quotes];
+
+    // Build category bar
+    function buildCategoryBar() {
+        const categories = ["सभी", ...new Set(quotes.map(q => q.category))];
+        const bar = document.getElementById("categoryBar");
+        categories.forEach(cat => {
+            const btn = document.createElement("button");
+            btn.className = "cat-btn" + (cat === "सभी" ? " active" : "");
+            btn.textContent = cat;
+            btn.onclick = () => filterCategory(cat);
+            bar.appendChild(btn);
+        });
+    }
+
+    function filterCategory(cat) {
+        currentCategory = cat;
+        document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".cat-btn").forEach(b => {
+            if (b.textContent === cat) b.classList.add("active");
+        });
+        filteredQuotes = cat === "सभी" ? [...quotes] : quotes.filter(q => q.category === cat);
+        shuffleArray(filteredQuotes);
+        currentIndex = -1;
+        showNext();
+    }
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+    }
+
+    function showNext() {
+        const quoteEl = document.getElementById("quoteText");
+        const writerEl = document.getElementById("writerName");
+
+        // Fade out
+        quoteEl.classList.remove("visible");
+        writerEl.classList.remove("visible");
+
+        setTimeout(() => {
+            currentIndex = (currentIndex + 1) % filteredQuotes.length;
+            if (currentIndex === 0) shuffleArray(filteredQuotes);
+
+            const q = filteredQuotes[currentIndex];
+            quoteEl.textContent = q.text;
+            writerEl.textContent = q.writer;
+
+            // Change background
+            const bg = document.getElementById("bg");
+            bg.style.background = gradients[Math.floor(Math.random() * gradients.length)];
+
+            // Update counter
+            document.getElementById("counter").textContent =
+                `${currentIndex + 1} / ${filteredQuotes.length}`;
+
+            // Fade in
+            requestAnimationFrame(() => {
+                quoteEl.classList.add("visible");
+                writerEl.classList.add("visible");
+            });
+        }, 400);
+    }
+
+    function copyQuote() {
+        if (currentIndex < 0) return;
+        const q = filteredQuotes[currentIndex];
+        const text = `"${q.text}"\n— ${q.writer}`;
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById("toast");
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2000);
+        });
+    }
+
+    // Floating particles
+    function createParticles() {
+        const container = document.getElementById("particles");
+        for (let i = 0; i < 30; i++) {
+            const p = document.createElement("div");
+            p.className = "particle";
+            const size = Math.random() * 6 + 2;
+            p.style.width = size + "px";
+            p.style.height = size + "px";
+            p.style.left = Math.random() * 100 + "%";
+            p.style.animationDuration = (Math.random() * 15 + 10) + "s";
+            p.style.animationDelay = (Math.random() * 10) + "s";
+            container.appendChild(p);
+        }
+    }
+
+    // Keyboard navigation
+    document.addEventListener("keydown", (e) => {
+        if (e.code === "Space" || e.code === "ArrowRight") {
+            e.preventDefault();
+            showNext();
+        } else if (e.code === "KeyC" && (e.metaKey || e.ctrlKey)) {
+            // allow default copy
+        } else if (e.code === "KeyC") {
+            copyQuote();
+        }
+    });
+
+    // Init
+    shuffleArray(filteredQuotes);
+    buildCategoryBar();
+    createParticles();
+    showNext();
+    </script>
+</body>
+</html>
